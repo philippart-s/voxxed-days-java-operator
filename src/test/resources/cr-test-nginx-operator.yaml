@@ -3,5 +3,5 @@ kind: NginxOperator
 metadata:
     name: nginx-template-operator
 spec:
-    replicaCount: 1
-    port: 30080
+    replicaCount: 2
+    port: 30081

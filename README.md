@@ -377,3 +377,36 @@ NAME                                             AGE
 nginxoperator.fr.wilda/nginx-template-operator   2m53s
 ```
  - tester dans un navigateur ou par un curl l'accès à `http://<node external ip>:30080`, pour récupérer l'IP externe du node : `kubectl get nodes -o wide`
+
+## ✏️ Update and delete service
+ - la branche `06-update-cr` contient le résultat de cette étape
+ - changer le port et le nombre de replicas dans la CR `cr-test-nginx-operator.yaml`:
+```yaml
+apiVersion: "fr.wilda/v1"
+kind: NginxOperator
+metadata:
+  name: nginx-template-operator
+spec:
+  replicaCount: 2
+  port: 30081
+```
+ - appliquer la CR: `kubectl apply -f ./src/test/resources/cr-test-nginx-operator.yaml -n test-nginx-operator`
+ - vérifier que le nombre de pods et le port ont bien changés:
+```bash
+$ kubectl get pod,svc  -n test-nginx-operator
+NAME                                    READY   STATUS    RESTARTS   AGE
+pod/nginx-deployment-84c7b56775-6ltb2   1/1     Running   0          6m57s
+pod/nginx-deployment-84c7b56775-cmgx4   1/1     Running   0          11s
+
+NAME                    TYPE       CLUSTER-IP    EXTERNAL-IP   PORT(S)        AGE
+service/nginx-service   NodePort   10.3.114.75   <none>        80:30081/TCP   6m57s
+```
+ - tester dans un navigateur ou par un curl l'accès à `http://<node external ip>:30081`
+ - supprimer le service: `kubectl delete svc/nginx-service -n test-nginx-operator`
+ - vérifier qu'il n'est pas recréé:
+```bash
+$ kubectl get svc  -n test-nginx-operator
+
+No resources found in test-nginx-operator namespace.
+```
+ - supprimer la CR : `kubectl delete nginxOperator/nginx-template-operator -n test-nginx-operator`
