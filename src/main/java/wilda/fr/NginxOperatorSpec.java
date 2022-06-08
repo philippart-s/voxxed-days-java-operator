@@ -1,13 +1,22 @@
 package wilda.fr;
 
 public class NginxOperatorSpec {
-    private String name;
+    private Integer replicaCount;
+    private Integer port;
 
-    public void setName(String name) {
-        this.name = name;
+    public void setPort(Integer port) {
+        this.port = port;
     }
 
-    public String getName() {
-        return name;
+    public Integer getPort() {
+        return port;
+    }
+
+    public void setReplicaCount(Integer replicaCount) {
+        this.replicaCount = replicaCount;
+    }
+
+    public Integer getReplicaCount() {
+        return replicaCount;
     }
 }
