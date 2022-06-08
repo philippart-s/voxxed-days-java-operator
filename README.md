@@ -385,7 +385,7 @@ nginxoperator.fr.wilda/nginx-voxxed-days   2m53s
 apiVersion: "fr.wilda/v1"
 kind: NginxOperator
 metadata:
-  name: nginx-template-operator
+  name: nginx-voxxed-days
 spec:
   replicaCount: 2
   port: 30081
@@ -409,4 +409,4 @@ $ kubectl get svc  -n test-nginx-operator
 
 No resources found in test-nginx-operator namespace.
 ```
- - supprimer la CR : `kubectl delete nginxOperator/nginx-template-operator -n test-nginx-operator`
+ - supprimer la CR : `kubectl delete nginxOperator/nginx-voxxed-days -n test-nginx-operator`
