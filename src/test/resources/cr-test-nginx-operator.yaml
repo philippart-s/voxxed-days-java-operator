@@ -1,7 +1,7 @@
 apiVersion: "fr.wilda/v1"
 kind: NginxOperator
 metadata:
-    name: nginx-template-operator
+    name: nginx-voxxed-days
 spec:
     replicaCount: 2
     port: 30081
