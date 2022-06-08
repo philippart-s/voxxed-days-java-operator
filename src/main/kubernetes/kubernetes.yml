@@ -1,0 +1,35 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+    name: service-deployment-cluster-role
+    namespace: voxxed-days-java-operator
+rules:
+  - apiGroups:
+    - ""
+    resources:
+    - secrets
+    - serviceaccounts
+    - services  
+    verbs:
+    - "*"
+  - apiGroups:
+    - "apps"
+    verbs:
+        - "*"
+    resources:
+    - deployments
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: service-deployment-cluster-role-binding
+  namespace: voxxed-days-java-operator
+roleRef:
+  kind: ClusterRole
+  apiGroup: rbac.authorization.k8s.io
+  name: service-deployment-cluster-role
+subjects:
+  - kind: ServiceAccount
+    name: voxxed-days-java-operator
+    namespace: voxxed-days-java-operator
+---
