@@ -353,7 +353,7 @@ public class NginxOperatorReconciler implements Reconciler<NginxOperator> {
 apiVersion: "fr.wilda/v1"
 kind: NginxOperator
 metadata:
-    name: nginx-template-operator
+    name: nginx-voxxed-days
 spec:
     replicaCount: 1
     port: 30080
@@ -374,7 +374,7 @@ NAME                    TYPE       CLUSTER-IP    EXTERNAL-IP   PORT(S)        AG
 service/nginx-service   NodePort   10.3.114.75   <none>        80:30080/TCP   77s
 
 NAME                                             AGE
-nginxoperator.fr.wilda/nginx-template-operator   2m53s
+nginxoperator.fr.wilda/nginx-voxxed-days   2m53s
 ```
  - tester dans un navigateur ou par un curl l'accès à `http://<node external ip>:30080`, pour récupérer l'IP externe du node : `kubectl get nodes -o wide`
 
@@ -385,7 +385,7 @@ nginxoperator.fr.wilda/nginx-template-operator   2m53s
 apiVersion: "fr.wilda/v1"
 kind: NginxOperator
 metadata:
-  name: nginx-template-operator
+  name: nginx-voxxed-days
 spec:
   replicaCount: 2
   port: 30081
@@ -409,7 +409,7 @@ $ kubectl get svc  -n test-nginx-operator
 
 No resources found in test-nginx-operator namespace.
 ```
- - supprimer la CR : `kubectl delete nginxOperator/nginx-template-operator -n test-nginx-operator`
+ - supprimer la CR : `kubectl delete nginxOperator/nginx-voxxed-days -n test-nginx-operator`
 
 ## 👀 Watch service deletion
  - la branche `07-watch-service-deletion` contient le résultat de cette étape
@@ -501,7 +501,7 @@ $ kubectl get svc  -n test-nginx-operator
 NAME            TYPE       CLUSTER-IP     EXTERNAL-IP   PORT(S)        AGE
 nginx-service   NodePort   10.3.230.222   <none>        80:30081/TCP   64s
 ```
- - supprimer la CR: `kubectl delete nginxOperator/nginx-template-operator -n test-nginx-operator`
+ - supprimer la CR: `kubectl delete nginxOperator/nginx-voxxed-days -n test-nginx-operator`
 
 ## 🐳  Packaging & deployment to K8s
  - la branche `08-package-deploy` contient le résultat de cette étape
@@ -591,7 +591,7 @@ __  ____  __  _____   ___  __ ____  ______
 2022-06-08 09:14:07,003 INFO  [io.quarkus] (main) Installed features: [cdi, kubernetes, kubernetes-client, micrometer, openshift-client, operator-sdk, smallrye-context-propagation, smallrye-health, vertx]
 ```
 - tester l'opérateur en créant une CR: `kubectl apply -f ./src/test/resources/cr-test-nginx-operator.yaml -n test-nginx-operator`
-- puis en la supprimant: `kubectl delete nginxOperator/nginx-template-operator -n test-nginx-operator`
+- puis en la supprimant: `kubectl delete nginxOperator/nginx-voxxed-days -n test-nginx-operator`
 - et constater que tout va bien:
 ```bash
   🛠️  Create / update Nginx resource operator ! 🛠️                                                                                   │
