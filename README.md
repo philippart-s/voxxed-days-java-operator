@@ -410,3 +410,95 @@ $ kubectl get svc  -n test-nginx-operator
 No resources found in test-nginx-operator namespace.
 ```
  - supprimer la CR : `kubectl delete nginxOperator/nginx-template-operator -n test-nginx-operator`
+
+## 👀 Watch service deletion
+ - la branche `07-watch-service-deletion` contient le résultat de cette étape
+ - modifier le reconciler `NginxOperatorReconciler.java` pour qu'il surveille le service:
+```java
+public class NginxOperatorReconciler
+    implements Reconciler<NginxOperator>, EventSourceInitializer<NginxOperator> {    
+    // ... unchanged code
+  @Override
+  public List<EventSource> prepareEventSources(EventSourceContext<NginxOperator> context) {
+    System.out.println("👀 Create watcher on service 👀");
+    SharedIndexInformer<Service> deploymentInformer = client.services().inAnyNamespace()
+        .withLabel("app.kubernetes.io/managed-by", "nginx-operator").runnableInformer(0);
+
+    return List.of(new InformerEventSource<>(deploymentInformer, Mappers.fromOwnerReference()));
+  }
+
+
+  @Override
+  public UpdateControl<NginxOperator> reconcile(NginxOperator resource, Context context) {
+    System.out.println("🛠️  Create / update Nginx resource operator ! 🛠️");
+
+    String namespace = resource.getMetadata().getNamespace();
+
+    // Load the Nginx deployment
+    Deployment deployment = loadYaml(Deployment.class, "/k8s/nginx-deployment.yaml");
+    // Apply the number of replicas and namespace
+    deployment.getSpec().setReplicas(resource.getSpec().getReplicaCount());
+    deployment.getMetadata().setNamespace(namespace);
+
+    // Create or update Nginx server
+    client.apps().deployments().inNamespace(namespace).createOrReplace(deployment);
+
+    // Create service
+    Service service = loadYaml(Service.class, "/k8s/nginx-service.yaml");
+    Service existingService = client.services().inNamespace(resource.getMetadata().getNamespace())
+        .withName("nginx-service").get();
+    if (existingService == null || !existingService.getSpec().getPorts().get(0).getNodePort()
+        .equals(resource.getSpec().getPort())) {
+      service.getMetadata().getOwnerReferences().get(0).setName(resource.getMetadata().getName());
+      service.getMetadata().getOwnerReferences().get(0).setUid(resource.getMetadata().getUid());
+      service.getSpec().getPorts().get(0).setNodePort(resource.getSpec().getPort());
+      client.services().inNamespace(namespace).createOrReplace(service);
+    }
+
+    return UpdateControl.noUpdate();
+  }
+
+
+    // ... unchanged code
+}
+```
+- modifier le manifest du service comme suit:
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-service
+  ownerReferences:
+    - apiVersion: apps/v1
+      kind: NginxOperator
+      name: ""
+      uid: ""
+  labels:
+    app.kubernetes.io/managed-by: nginx-operator
+spec:
+  type: NodePort
+  selector:
+    app: nginx
+  ports:
+    - port: 80
+      targetPort: 80
+      nodePort: 30080
+```
+- appliquer la CR pour créer le pod Nginx: `kubectl apply -f ./src/test/resources/cr-test-nginx-operator.yaml -n test-nginx-operator`
+- supprimer le service: `kubectl delete svc/nginx-service -n test-nginx-operator`
+- l'opérateur le recrée:
+```bash
+    2022-04-04 16:23:17,025 INFO  [io.qua.dep.dev.RuntimeUpdatesProcessor] (pool-1-thread-1) Live reload total time: 1.464s 
+    🛠️  Create / update Nginx resource operator ! 🛠️
+    🛠️  Create / update Nginx resource operator ! 🛠️
+    🛠️  Create / update Nginx resource operator ! 🛠️
+    🛠️  Create / update Nginx resource operator ! 🛠️    
+```
+ - vérifier que le service a bien été recréé: `kubectl get svc  -n test-nginx-operator` 
+```bash
+$ kubectl get svc  -n test-nginx-operator
+
+NAME            TYPE       CLUSTER-IP     EXTERNAL-IP   PORT(S)        AGE
+nginx-service   NodePort   10.3.230.222   <none>        80:30081/TCP   64s
+```
+ - supprimer la CR: `kubectl delete nginxOperator/nginx-template-operator -n test-nginx-operator`
