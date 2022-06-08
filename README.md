@@ -353,7 +353,7 @@ public class NginxOperatorReconciler implements Reconciler<NginxOperator> {
 apiVersion: "fr.wilda/v1"
 kind: NginxOperator
 metadata:
-    name: nginx-template-operator
+    name: nginx-voxxed-days
 spec:
     replicaCount: 1
     port: 30080
@@ -374,6 +374,6 @@ NAME                    TYPE       CLUSTER-IP    EXTERNAL-IP   PORT(S)        AG
 service/nginx-service   NodePort   10.3.114.75   <none>        80:30080/TCP   77s
 
 NAME                                             AGE
-nginxoperator.fr.wilda/nginx-template-operator   2m53s
+nginxoperator.fr.wilda/nginx-voxxed-days   2m53s
 ```
  - tester dans un navigateur ou par un curl l'accès à `http://<node external ip>:30080`, pour récupérer l'IP externe du node : `kubectl get nodes -o wide`
