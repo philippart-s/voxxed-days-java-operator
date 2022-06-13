@@ -561,7 +561,7 @@ pod/nginx-deployment-84c7b56775-cmgx4   1/1     Running   0          11s
  - supprimer la CR: `kubectl delete nginxOperator/nginx-voxxed-days -n test-nginx-operator`
 
 ## 🐳  Packaging & deployment to K8s
- - la branche `08-package-deploy` contient le résultat de cette étape
+ - la branche `09-package-deploy` contient le résultat de cette étape
  - arrêter le mode dev de Quarkus
  - modifier le fichier `application.properties`:
 ```properties
