@@ -44,8 +44,14 @@ public class NginxOperatorReconciler
 
     // Load the Nginx deployment
     Deployment deployment = loadYaml(Deployment.class, "/k8s/nginx-deployment.yaml");
-    // Apply the number of replicas and namespace
-    deployment.getSpec().setReplicas(resource.getSpec().getReplicaCount());
+    // Apply the number of replicas if they are between 1 and 2 and set the namespace
+    if (resource.getSpec().getReplicaCount() > 0 && resource.getSpec().getReplicaCount() < 3) {
+      deployment.getSpec().setReplicas(resource.getSpec().getReplicaCount());
+    } else {
+      System.out
+          .println(String.format("🛑 %s is not a valid number of replicas (must be 1 or 2) 🛑",
+              resource.getSpec().getReplicaCount()));
+    }
     deployment.getMetadata().setNamespace(namespace);
 
     // Create or update Nginx server
