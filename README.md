@@ -502,3 +502,60 @@ NAME            TYPE       CLUSTER-IP     EXTERNAL-IP   PORT(S)        AGE
 nginx-service   NodePort   10.3.230.222   <none>        80:30081/TCP   64s
 ```
  - supprimer la CR: `kubectl delete nginxOperator/nginx-voxxed-days -n test-nginx-operator`
+
+ ## 🛑 Add limit to replicas
+ - la branche `08-add-limit-to-replicas` contient le résultat de cette étape
+ - modifier le reconciler `NginxOperatorReconciler.java` pour qu'il empêche la création de plus de 3 Pods:
+```java
+public class NginxOperatorReconciler
+    implements Reconciler<NginxOperator>, EventSourceInitializer<NginxOperator> {
+
+  // Unchanged code ...
+
+  @Override
+  public UpdateControl<NginxOperator> reconcile(NginxOperator resource, Context context) {
+    System.out.println("🛠️  Create / update Nginx resource operator ! 🛠️");
+
+    String namespace = resource.getMetadata().getNamespace();
+
+    // Load the Nginx deployment
+    Deployment deployment = loadYaml(Deployment.class, "/k8s/nginx-deployment.yaml");
+    // Apply the number of replicas if they are between 1 and 2 and set the namespace
+    if (resource.getSpec().getReplicaCount() > 0 && resource.getSpec().getReplicaCount() < 3) {
+      deployment.getSpec().setReplicas(resource.getSpec().getReplicaCount());
+    } else {
+      System.out
+          .println(String.format("🛑 %s is not a valid number of replicas (must be 1 or 2) 🛑",
+              resource.getSpec().getReplicaCount()));
+    }
+    deployment.getMetadata().setNamespace(namespace);
+
+    // Unchanged code ...
+  }
+
+  // Unchanged code ...
+}
+```
+- changer le nombre de replicas dans la CR `cr-test-nginx-operator.yaml`:
+```yaml
+apiVersion: "fr.wilda/v1"
+kind: NginxOperator
+metadata:
+  name: nginx-voxxed-days
+spec:
+  replicaCount: 5
+  port: 30081
+```
+ - appliquer la CR: `kubectl apply -f ./src/test/resources/cr-test-nginx-operator.yaml -n test-nginx-operator`
+ - vérifier que le nombre de pods n'a pas changé:
+```bash
+$ kubectl get pod  -n test-nginx-operator
+NAME                                    READY   STATUS    RESTARTS   AGE
+pod/nginx-deployment-84c7b56775-6ltb2   1/1     Running   0          6m57s
+pod/nginx-deployment-84c7b56775-cmgx4   1/1     Running   0          11s
+```
+ - et que l'opérateur a affiché le message d'erreur indiquant que le nombre de pods est invalide:
+```bash
+🛑 5 is not a valid number of replicas (must be 1 or 2) 🛑
+```
+ - supprimer la CR: `kubectl delete nginxOperator/nginx-voxxed-days -n test-nginx-operator`

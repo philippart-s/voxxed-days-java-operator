@@ -3,5 +3,5 @@ kind: NginxOperator
 metadata:
     name: nginx-voxxed-days
 spec:
-    replicaCount: 2
+    replicaCount: 5
     port: 30081
