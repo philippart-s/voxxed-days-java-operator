@@ -3,4 +3,4 @@ kind: NginxOperator
 metadata:
   name: hello-world
 spec:
-  name: Template Java Operator
+  name: Voxxed Days Lux 2022
